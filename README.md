@@ -51,8 +51,6 @@ Now let’s deploy a test container!
 -   Run `docker rm helloworld` to remove container group. Running this command completely removes container group so there are no charges.
 -   Optionally remove resource group if you’ve created it only for the purpose of this demo
 
-![](https://miro.medium.com/max/60/1*8cz8mDNbxDofR59gv_VXug.png?q=20)
-
 ![](https://miro.medium.com/max/2298/1*8cz8mDNbxDofR59gv_VXug.png)
 
 Success!
@@ -60,8 +58,6 @@ Success!
 -   Switch back to docker desktop context: `docker context use default`
 
 We’ve see how easy it is to deploy a container group directly to Azure Container Instances. This could be very useful for testing purposes and quick inner development loop.
-
-This blog barely scratches the surface of what Azure Container Instances can do and how to integrate developer workflow. In my opinion Azure Container Instances is one of the most flexible and powerful serverless offerings in Azure.
 
 There are a lot of great blogs and tutorials to check if you are interested to learn more.
 

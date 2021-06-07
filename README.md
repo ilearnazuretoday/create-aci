@@ -38,29 +38,22 @@ We are going to deploy a sample web page. The idea is that with docker CLI and A
 
 > _Important node: this flow is only for testing purposes, in real code scenario you would have CI/CD pipeline deploying your app for you._
 
-We are going to use bash in Azure shell, but the same is of course possible with `powershell`.
+We are going to use bash with running docker daemon, but the same is of course possible with `powershell`.
 
 > _Docker CLI contains now build-in integration with Azure Container Instances through a_ **_context_** _command. When using Azure CLI, you cat activate_ **_Azure Interactive_** _by typing_ `_az interactive_`_. This is an experimental feature of Azure CLI which gives you parameters completion and more!_
-
-First let’s setup variables and authenticate with Azure using docker CLI
-
-- setup variable for _tenant_ to enable login: `TENANT=$(az account show --query tenantId -o tsv)`
-- Finally let’s login to Azure `docker login azure --tenant-id $TENANT`. You will be prompted to login via AD or paste authentication code.
-- Create context `docker context create aci azure-context`
-
-> _This command is interactive and will prompt you to select_ **_subscription, resource group (create or select existing one) and location_**_. Make sure to note resource group name if you create a new one, so later it’s easy to cleanup resources._
 
 Now let’s deploy a test container!
 
 ### Deploy sample Web App
 
 1. Switch to new context `docker context use azure-context`
-2. Run [ACI hello world image](https://hub.docker.com/r/microsoft/aci-helloworld) `docker run -d --name helloworld -p 80:80 microsoft/aci-helloworld`
-3. Great! Now grep for host IP and navigate to it in a browser: `docker inspect helloworld | grep HostIP` You should see “Welcome to Azure Container Instances!” as below.
-4. Cleanup resources
+2. Run [ACI hello world image](https://hub.docker.com/r/microsoft/aci-helloworld) `az container create --resource-group RG-LEARNING-AZURE --name learning-azure --image mcr.microsoft.com/azuredocs/aci-helloworld --dns-name-label learning-aci --ports 80`
+3. Great! Now show FDQN address and use browser to see container running: `az container show --resource-group RG-LEARNING-AZURE --name learning-azure --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table` You should see “Welcome to Azure Container Instances!” as below.
+4. Examine the container group in Azure
+5. Cleanup resources
 
-- Run `docker stop helloworld` to stop the container
-- Run `docker rm helloworld` to remove container group. Running this command completely removes container group so there are no charges.
+- Run `az container delete --resource-group RG-LEARNING-AZURE --name learning-azure` to delete the container
+Running this command completely removes container group so there are no charges.
 
 ![](https://miro.medium.com/max/2298/1*8cz8mDNbxDofR59gv_VXug.png)
 
@@ -68,15 +61,22 @@ Success!
 
 ### Deploy sample Go API
 
-1. Build docker container with Go API `docker build -t go-api .`
-2. Run the container in ACI `docker run -d --name go-api -p 8080:8080 go-api`
-3. Obtain container IP and navigate to it appending `/version` to call the API
-4. Cleanup resources
+1. Build docker container with Go API `docker build -t acrlearningazure.azurecr.io/go-api:v1.0 .`
+2. Push the container to our registry `docker push acrlearningazure.azurecr.io/go-api:v1.0`
+3. You might need to proved ACR username and password to start the container. Let's capture them into variables:
+   - `ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)`
+   - `ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)`
 
-- Run `docker stop go-api` to stop the container
-- Run `docker rm go-api` to remove container group. Running this command completely removes container group so there are no charges.
+4. Run go api container `az container create --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 80`
 
-- Switch back to docker desktop context: `docker context use default`
+
+5. Now show FDQN address and use browser to see container running: `az container show --resource-group RG-LEARNING-AZURE --name learning-azure-api --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table`
+6. Obtain container IP and navigate to it appending `:8080/version` to call the API
+7. Check contianer logs `az container logs --resource-group RG-LEARNING-AZURE --name learning-azure-api`
+8. Cleanup resources
+
+- Run `az container delete --resource-group RG-LEARNING-AZURE --name learning-azure-api` to delete the container
+Running this command completely removes container group so there are no charges.
 
 We’ve see how easy it is to deploy a container group directly to Azure Container Instances. This could be very useful for testing purposes and quick inner development loop.
 

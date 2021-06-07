@@ -12,9 +12,9 @@ Prerequisites:
 
 Azure Container Instances is a compute offering that bridges the gap between lightweight Azure Functions and more complex, but fully fledged Azure Kubernetes Service.
 
-![Azure ACI Architecture](http://www.plantuml.com/plantuml/proxy?cache=yes&src=https://raw.githubusercontent.com/Piotr1215/dca-prep-kit/master/diagrams/docker-architecture.puml&fmt=svg)
+![Azure ACI Architecture](http://www.plantuml.com/plantuml/proxy?cache=yes&src=https://raw.githubusercontent.com/Piotr1215/dca-prep-kit/master/diagrams/azure-aci-architecture.puml&fmt=svg)
 
-![](https://miro.medium.com/max/2220/1*Hy7vemcwEjIpzQI3LyrX3w.png)
+
 
 [https://docs.microsoft.com/en-us/azure/container-instances/container-instances-container-groups](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-container-groups)
 

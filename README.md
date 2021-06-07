@@ -46,11 +46,10 @@ Now let’s deploy a test container!
 
 ### Deploy sample Web App
 
-1. Switch to new context `docker context use azure-context`
-2. Run [ACI hello world image](https://hub.docker.com/r/microsoft/aci-helloworld) `az container create --resource-group RG-LEARNING-AZURE --name learning-azure --image mcr.microsoft.com/azuredocs/aci-helloworld --dns-name-label learning-aci --ports 80`
-3. Great! Now show FDQN address and use browser to see container running: `az container show --resource-group RG-LEARNING-AZURE --name learning-azure --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table` You should see “Welcome to Azure Container Instances!” as below.
-4. Examine the container group in Azure
-5. Cleanup resources
+1. Run [ACI hello world image](https://hub.docker.com/r/microsoft/aci-helloworld) `az container create --resource-group RG-LEARNING-AZURE --name learning-azure --image mcr.microsoft.com/azuredocs/aci-helloworld --dns-name-label learning-aci --ports 80`
+2. Great! Now show FDQN address and use browser to see container running: `az container show --resource-group RG-LEARNING-AZURE --name learning-azure --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table` You should see “Welcome to Azure Container Instances!” as below.
+3. Examine the container group in Azure
+4. Cleanup resources
 
 - Run `az container delete --resource-group RG-LEARNING-AZURE --name learning-azure` to delete the container
 Running this command completely removes container group so there are no charges.
@@ -64,10 +63,14 @@ Success!
 1. Build docker container with Go API `docker build -t acrlearningazure.azurecr.io/go-api:v1.0 .`
 2. Push the container to our registry `docker push acrlearningazure.azurecr.io/go-api:v1.0`
 3. You might need to proved ACR username and password to start the container. Let's capture them into variables:
-   - `ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)`
-   - `ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)`
+   - `ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)` - linux
+   - `ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)` - linux
+   - `$Env:ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)` - windows
+   - `$Env:ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)` - windows
 
-4. Run go api container `az container create --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 80`
+4. Run go api container
+   - `az container create --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 8080` - linux
+   - `az container create --registry-username $Env:ACR_USERNAME --registry-password $Env:ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 8080` - windows
 
 
 5. Now show FDQN address and use browser to see container running: `az container show --resource-group RG-LEARNING-AZURE --name learning-azure-api --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table`

@@ -1,0 +1,37 @@
+# Stage 1 - build phase
+# Build binaries of your go app
+
+# Use image containing golang distribution as base image
+FROM golang:1.16 as builder
+
+# Copy all files excluding the ones specified in .dockerignore
+ADD . /src
+
+# Set working direcory in container for convinience
+WORKDIR /src
+
+# Run tests directly in container
+# If tests fail, container will not build
+RUN go test --cover -v ./...
+
+# This time output binary as "demo"
+RUN go build -v -o demo
+
+# Output content of the folder for readability
+RUN ls
+
+# Stage 2 - packaging phase
+# We don't need all the packages and dependencies from previous image
+# They would make our image big and create larger attack surface
+# Here we are using alpine image which is very fast but has linux file system so we can exec into container
+FROM alpine:3.4
+
+# This command tells docker to expose port 8080 in the running container
+EXPOSE 8080
+
+# Finally we are copying the binaries from previous image and executing the app
+# Notice that here we are copying binary itslf to a $PATH location on Linux file system
+# This allows us to execute command "demo" without passing path on container start
+COPY --from=builder /src/demo /usr/local/bin/demo
+RUN chmod +x /usr/local/bin/demo
+CMD ["demo"]

@@ -66,6 +66,8 @@ Success!
 > "Distroless" images contain only your application and its runtime dependencies. They do not contain package managers, shells or any other programs you would expect to find in a standard
 > Linux distribution. For the purpose of class we are decorating the *Dockerfile* with commands outputing debug information while the image is being built. To do that, run the build command with `--progress=plain` flag, like so `docker build --progress=plain  -t acrlearningazure.azurecr.io/go-api:v1.0 .`. This will produce output from commands to stdout. Please read comments in the *Dockerfile* for more information.
 
+> Another way to use container is to run tests inside of it, this way you can test locally or in pipeline without explicit step in the pipeline. Build another image from different file like so `docker build --progress=plain -f Dockerfile.test -t acrlearningazure.azurecr.io/go-api:test .`
+
 #### Push the container to our registry `docker push acrlearningazure.azurecr.io/go-api:v1.0`
 
 #### You might need to proved ACR username and password to start the container. Let's capture them into variables:

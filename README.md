@@ -60,23 +60,32 @@ Success!
 
 ### Deploy sample Go API
 
-1. Build docker container with Go API `docker build -t acrlearningazure.azurecr.io/go-api:v1.0 .`
-2. Push the container to our registry `docker push acrlearningazure.azurecr.io/go-api:v1.0`
-3. You might need to proved ACR username and password to start the container. Let's capture them into variables:
-   - `ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)` - linux
-   - `ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)` - linux
-   - `$Env:ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)` - windows
-   - `$Env:ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)` - windows
+#### Build docker container with Go API `docker build -t acrlearningazure.azurecr.io/go-api:v1.0 .`
 
-4. Run go api container
-   - `az container create --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 8080` - linux
-   - `az container create --registry-username $Env:ACR_USERNAME --registry-password $Env:ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 8080` - windows
+> A note on building the image here. We are using *multi-stage builds* to make image size smaller as well as *distroless* base image for linux to lower potential attack surface.
+> "Distroless" images contain only your application and its runtime dependencies. They do not contain package managers, shells or any other programs you would expect to find in a standard
+> Linux distribution. For the purpose of class we are decorating the *Dockerfile* with commands outputing debug information while the image is being built. To do that, run the build command with `--progress=plain` flag, like so `docker build --progress=plain  -t acrlearningazure.azurecr.io/go-api:v1.0 .`. This will produce output from commands to stdout. Please read comments in the *Dockerfile* for more information.
+
+#### Push the container to our registry `docker push acrlearningazure.azurecr.io/go-api:v1.0`
+
+#### You might need to proved ACR username and password to start the container. Let's capture them into variables:
+
+- `ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)` - linux
+- `ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)` - linux
+- `$Env:ACR_USERNAME=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query username)` - windows
+- `$Env:ACR_PASSWORD=$(az acr credential show --resource-group RG-LEARNING-AZURE --name acrlearningazure --query passwords[0].value)` - windows
+
+#### Run go api container
+
+- `az container create --registry-username $ACR_USERNAME --registry-password $ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 8080` - linux
+- `az container create --registry-username $Env:ACR_USERNAME --registry-password $Env:ACR_PASSWORD --resource-group RG-LEARNING-AZURE --name learning-azure-api --image acrlearningazure.azurecr.io/go-api:v1.0 --dns-name-label learning-aci-api --ports 8080` - windows
 
 
-5. Now show FDQN address and use browser to see container running: `az container show --resource-group RG-LEARNING-AZURE --name learning-azure-api --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table`
-6. Obtain container IP and navigate to it appending `:8080/version` to call the API
-7. Check contianer logs `az container logs --resource-group RG-LEARNING-AZURE --name learning-azure-api`
-8. Cleanup resources
+#### Now show FDQN address and use browser to see container running: `az container show --resource-group RG-LEARNING-AZURE --name learning-azure-api --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table`
+
+1. Obtain container IP and navigate to it appending `:8080/version` to call the API
+2. Check contianer logs `az container logs --resource-group RG-LEARNING-AZURE --name learning-azure-api`
+3. Cleanup resources
 
 - Run `az container delete --resource-group RG-LEARNING-AZURE --name learning-azure-api` to delete the container
 Running this command completely removes container group so there are no charges.

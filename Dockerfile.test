@@ -33,5 +33,10 @@ EXPOSE 8080
 # Notice that here we are copying binary itslf to a $PATH location on Linux file system
 # This allows us to execute command "demo" without passing path on container start
 COPY --from=builder /src/demo /usr/local/bin/demo
+RUN apk add --no-cache \
+    cowsay \
+    fortune \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN chmod +x /usr/local/bin/demo
 CMD ["demo"]
